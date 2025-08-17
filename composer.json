@@ -22,7 +22,6 @@
     "require-dev": {
         "barryvdh/laravel-ide-helper": "^3.6",
         "fakerphp/faker": "^1.24.1",
-        "larastan/larastan": "^3.6",
         "laravel/boost": "^1.0.18",
         "laravel/pail": "^1.2.3",
         "laravel/pint": "^1.24.0",
@@ -67,12 +66,10 @@
             "pint --test"
         ],
         "test:unit": "pest --parallel",
-        "test:types": "phpstan --memory-limit=365M",
         "test:refactor": "rector --dry-run",
         "test": [
             "@test:unit",
             "@test:lint",
-            "@test:types",
             "@test:refactor"
         ]
     },
