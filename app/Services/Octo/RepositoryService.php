@@ -10,7 +10,7 @@ use App\Models\User;
 use Carbon\Carbon;
 use Exception;
 
-final class RepositoryService
+final readonly class RepositoryService
 {
     private Connection $connection;
 
@@ -35,12 +35,12 @@ final class RepositoryService
         // Process in chunks to avoid memory issues
         collect($repositories)
             ->chunk(50) // Process 50 repositories at a time
-            ->each(function ($chunk) {
+            ->each(function ($chunk): void {
                 $this->processBatchRepositories($chunk);
             });
     }
 
-    private function processBatchRepositories($repositoryChunk): void
+    private function processBatchRepositories(\Illuminate\Support\Collection $repositoryChunk): void
     {
         $batchData = [];
         $now = now();
@@ -97,7 +97,7 @@ final class RepositoryService
 
             $data = $response->json();
 
-            if (! is_array($data) || empty($data)) {
+            if (! is_array($data) || $data === []) {
                 break;
             }
 

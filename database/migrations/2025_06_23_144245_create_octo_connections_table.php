@@ -14,7 +14,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('octo_connections', function (Blueprint $table) {
+        Schema::create('octo_connections', function (Blueprint $table): void {
             $table->id();
             $table->foreignIdFor(User::class)->constrained()->cascadeOnDelete();
             $table->string('github_email')->nullable();

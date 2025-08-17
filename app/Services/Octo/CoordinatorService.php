@@ -12,7 +12,7 @@ use App\Models\Octo\Repository;
 use App\Models\User;
 use Exception;
 
-final class CoordinatorService
+final readonly class CoordinatorService
 {
     public function __construct(
         private User $user

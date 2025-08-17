@@ -14,7 +14,7 @@ use Illuminate\Http\Client\RequestException;
 use Illuminate\Http\Client\Response;
 use Illuminate\Support\Facades\Http;
 
-final class CommentService
+final readonly class CommentService
 {
     private Connection $connection;
 
@@ -74,7 +74,7 @@ final class CommentService
         $allComments = [];
         $perPage = 100;
 
-        $endpoint = $issueNumber
+        $endpoint = $issueNumber !== null && $issueNumber !== 0
             ? "/repos/{$repoFullName}/issues/{$issueNumber}/comments"
             : "/repos/{$repoFullName}/issues/comments";
 
@@ -107,7 +107,7 @@ final class CommentService
         $allComments = [];
         $perPage = 100;
 
-        $endpoint = $pullNumber
+        $endpoint = $pullNumber !== null && $pullNumber !== 0
             ? "/repos/{$repoFullName}/pulls/{$pullNumber}/comments"
             : "/repos/{$repoFullName}/pulls/comments";
 
@@ -140,7 +140,7 @@ final class CommentService
         $allComments = [];
         $perPage = 100;
 
-        $endpoint = $commitSha
+        $endpoint = $commitSha !== null && $commitSha !== '' && $commitSha !== '0'
             ? "/repos/{$repoFullName}/commits/{$commitSha}/comments"
             : "/repos/{$repoFullName}/comments";
 
@@ -206,7 +206,7 @@ final class CommentService
 
             return $response;
         } catch (RequestException $e) {
-            throw new Exception('GitHub API request failed: '.$e->getMessage());
+            throw new Exception('GitHub API request failed: '.$e->getMessage(), $e->getCode(), $e);
         }
     }
 }

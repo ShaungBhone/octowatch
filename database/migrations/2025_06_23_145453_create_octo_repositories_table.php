@@ -13,7 +13,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('octo_repositories', function (Blueprint $table) {
+        Schema::create('octo_repositories', function (Blueprint $table): void {
             $table->id();
             $table->foreignId('octo_connection_id')
                 ->constrained()

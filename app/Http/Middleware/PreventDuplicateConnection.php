@@ -55,7 +55,7 @@ final class PreventDuplicateConnection
             $user = Socialite::driver('github')->userFromToken($token);
 
             return $user !== null;
-        } catch (Exception $e) {
+        } catch (Exception) {
             return false;
         }
     }

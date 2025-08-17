@@ -12,7 +12,7 @@ use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Str;
 use InvalidArgumentException;
 
-final class ApiClientService
+final readonly class ApiClientService
 {
     public function __construct(
         private Connection $connection
@@ -52,7 +52,7 @@ final class ApiClientService
 
             return $response;
         } catch (RequestException $e) {
-            throw new Exception('GitHub API request failed: '.$e->getMessage());
+            throw new Exception('GitHub API request failed: '.$e->getMessage(), $e->getCode(), $e);
         }
     }
 }

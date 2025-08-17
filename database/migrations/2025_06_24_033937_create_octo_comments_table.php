@@ -14,7 +14,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('octo_comments', function (Blueprint $table) {
+        Schema::create('octo_comments', function (Blueprint $table): void {
             $table->id();
             $table->foreignIdFor(Repository::class)
                 ->constrained()

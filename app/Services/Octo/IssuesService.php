@@ -11,7 +11,7 @@ use App\Models\User;
 use Carbon\Carbon;
 use Exception;
 
-final class IssuesService
+final readonly class IssuesService
 {
     private Connection $connection;
 
@@ -48,7 +48,7 @@ final class IssuesService
         // Process in chunks to improve memory usage and database performance
         collect($issues)
             ->chunk(50) // Process 50 issues at a time
-            ->each(function ($chunk) use ($repository) {
+            ->each(function ($chunk) use ($repository): void {
                 $this->processBatchIssues($chunk, $repository);
             });
     }
@@ -73,7 +73,7 @@ final class IssuesService
         return $response->json();
     }
 
-    private function processBatchIssues($issueChunk, Repository $repository): void
+    private function processBatchIssues(\Illuminate\Support\Collection $issueChunk, Repository $repository): void
     {
         $batchData = [];
         $now = now();
@@ -138,9 +138,7 @@ final class IssuesService
             }
 
             // Filter out pull requests (GitHub API includes PRs in issues endpoint)
-            $actualIssues = array_filter($issues, function ($issue) {
-                return ! isset($issue['pull_request']);
-            });
+            $actualIssues = array_filter($issues, fn (array $issue): bool => ! isset($issue['pull_request']));
 
             $allIssues = array_merge($allIssues, $actualIssues);
             $page++;
@@ -153,33 +151,5 @@ final class IssuesService
         } while (count($issues) === $perPage && $page <= $maxPages);
 
         return $allIssues;
-    }
-
-    private function saveIssue(array $issueData, Repository $repository): void
-    {
-        Issues::updateOrCreate(
-            [
-                'octo_connection_id' => $this->connection->id,
-                'octo_repository_id' => $repository->id,
-                'issue_id' => $issueData['id'],
-            ],
-            [
-                'number' => $issueData['number'],
-                'title' => $issueData['title'],
-                'body' => $issueData['body'] ?? '',
-                'state' => $issueData['state'],
-                'author_login' => $issueData['user']['login'] ?? null,
-                'author_avatar_url' => $issueData['user']['avatar_url'] ?? null,
-                'labels' => $issueData['labels'],
-                // 'assignees' => $assignees,
-                // 'milestone' => $issueData['milestone']['title'] ?? null,
-                'comments_count' => $issueData['comments'] ?? 0,
-                // 'locked' => $issueData['locked'] ?? false,
-                // 'html_url' => $issueData['html_url'],
-                'created_at_github' => Carbon::parse($issueData['created_at']),
-                'updated_at_github' => Carbon::parse($issueData['updated_at']),
-                'closed_at_github' => Carbon::parse($issueData['closed_at']),
-            ]
-        );
     }
 }

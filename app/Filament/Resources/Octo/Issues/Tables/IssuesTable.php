@@ -31,7 +31,7 @@ final class IssuesTable
                             ->formatStateUsing(fn (
                                 $state,
                                 $record
-                            ) => "{$state} #{$record->number}")
+                            ): string => "{$state} #{$record->number}")
                             ->searchable(),
                         TextColumn::make('state')
                             ->badge()
@@ -60,7 +60,7 @@ final class IssuesTable
                             ->rows(3),
                     ])
                     ->modalHeading(
-                        fn (Issues $record) => "{$record->repository->name} #{$record->number}"
+                        fn (Issues $record): string => "{$record->repository->name} #{$record->number}"
                     )
                     ->modalContent(function (Issues $record) {
                         $comments = Comment::where(
@@ -73,11 +73,11 @@ final class IssuesTable
 
                         return view(
                             'comments-modal',
-                            compact('comments', 'record')
+                            ['comments' => $comments, 'record' => $record]
                         );
                     })
                     ->modalSubmitActionLabel('Add Comment')
-                    ->action(function (array $data, Issues $record) {
+                    ->action(function (array $data, Issues $record): void {
                         $user = Auth::user();
                         $commentService = CommentService::forUser($user);
 
@@ -100,7 +100,7 @@ final class IssuesTable
                                 'updated_at_github' => $githubComment['updated_at'] ? \Carbon\Carbon::parse($githubComment['updated_at']) : now(),
                             ]);
 
-                        } catch (Exception $e) {
+                        } catch (Exception) {
                             $githubUsername = $record->repository->connection->username ?? 'Unknown';
 
                             Comment::create([

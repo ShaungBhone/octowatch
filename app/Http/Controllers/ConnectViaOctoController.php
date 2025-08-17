@@ -65,7 +65,7 @@ final class ConnectViaOctoController extends Controller
         }
     }
 
-    public function destroy(string $id)
+    public function destroy(string $id): void
     {
         //
     }
