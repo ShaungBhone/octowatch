@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use App\Models\Octo\Repository;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
@@ -29,7 +31,7 @@ return new class extends Migration
             $table->enum('type', [
                 'issue',
                 'pull_request',
-                'commit'
+                'commit',
             ]);
 
             $table->index(['octo_repository_id', 'type']);

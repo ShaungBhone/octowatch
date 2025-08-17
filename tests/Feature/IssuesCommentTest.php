@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use App\Models\Octo\Connection;
 use App\Models\Octo\Issues;
 use App\Models\Octo\Repository;
@@ -68,7 +70,7 @@ it('handles GitHub API failures gracefully', function () {
     ]);
 
     $commentService = CommentService::forUser($user);
-    
+
     try {
         $commentService->postIssueComment('testuser/testrepo', 123, 'Test comment');
         expect(false)->toBeTrue('Expected exception was not thrown');

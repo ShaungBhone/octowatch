@@ -1,21 +1,27 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Services\Octo;
 
-use App\Jobs\{SyncRepositoriesJob, SyncIssuesJob, SyncCommentsJob};
-use App\Models\Octo\{Connection, Repository};
+use App\Jobs\SyncCommentsJob;
+use App\Jobs\SyncIssuesJob;
+use App\Jobs\SyncRepositoriesJob;
+use App\Models\Octo\Connection;
+use App\Models\Octo\Repository;
 use App\Models\User;
+use Exception;
 
-use App\Services\Octo\{
-    CommentService,
-    RepositoryService
-};
-
-class CoordinatorService
+final class CoordinatorService
 {
     public function __construct(
-        protected User $user
+        private User $user
     ) {}
+
+    public static function forUser(User $user): self
+    {
+        return new self($user);
+    }
 
     public function syncRepositories(): void
     {
@@ -41,7 +47,7 @@ class CoordinatorService
     {
         // Ensure repositories are synced first
         $this->ensureRepositoriesAreSynced();
-        
+
         SyncIssuesJob::dispatch($this->user);
     }
 
@@ -68,7 +74,7 @@ class CoordinatorService
         // Chain jobs - sync repositories first, then issues
         SyncRepositoriesJob::dispatch($this->user)
             ->chain([
-                new SyncIssuesJob($this->user)
+                new SyncIssuesJob($this->user),
             ]);
     }
 
@@ -84,7 +90,7 @@ class CoordinatorService
         // Chain jobs - sync repositories first, then comments
         SyncRepositoriesJob::dispatch($this->user)
             ->chain([
-                new SyncCommentsJob($this->user)
+                new SyncCommentsJob($this->user),
             ]);
     }
 
@@ -94,7 +100,7 @@ class CoordinatorService
         SyncRepositoriesJob::dispatch($this->user)
             ->chain([
                 new SyncIssuesJob($this->user),
-                new SyncCommentsJob($this->user)
+                new SyncCommentsJob($this->user),
             ]);
     }
 
@@ -102,11 +108,11 @@ class CoordinatorService
     {
         // Ensure repositories are synced first
         $this->ensureRepositoriesAreSynced();
-        
+
         // Chain issues and comments jobs
         SyncIssuesJob::dispatch($this->user)
             ->chain([
-                new SyncCommentsJob($this->user)
+                new SyncCommentsJob($this->user),
             ]);
     }
 
@@ -128,21 +134,16 @@ class CoordinatorService
     private function ensureRepositoriesAreSynced(): void
     {
         $connection = Connection::where('user_id', $this->user->id)->first();
-        
-        if (!$connection) {
-            throw new \Exception('No GitHub connection found for user.');
+
+        if (! $connection) {
+            throw new Exception('No GitHub connection found for user.');
         }
 
         $repositoryCount = Repository::where('octo_connection_id', $connection->id)->count();
-        
+
         // If no repositories exist, sync them first
         if ($repositoryCount === 0) {
             $this->syncRepositories();
         }
-    }
-
-    public static function forUser(User $user): self
-    {
-        return new self($user);
     }
 }

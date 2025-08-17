@@ -1,16 +1,23 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Models\Octo;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-class Repository extends Model
+final class Repository extends Model
 {
     use HasFactory;
-    
+
     protected $table = 'octo_repositories';
+
+    public function connection(): BelongsTo
+    {
+        return $this->belongsTo(Connection::class, 'octo_connection_id');
+    }
 
     protected function casts(): array
     {
@@ -18,10 +25,5 @@ class Repository extends Model
             'private' => 'boolean',
             'updated_at_github' => 'datetime',
         ];
-    }
-
-    public function connection(): BelongsTo
-    {
-        return $this->belongsTo(Connection::class, 'octo_connection_id');
     }
 }

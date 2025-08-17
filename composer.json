@@ -3,7 +3,10 @@
     "name": "laravel/livewire-starter-kit",
     "type": "project",
     "description": "The official Laravel starter kit for Livewire.",
-    "keywords": ["laravel", "framework"],
+    "keywords": [
+        "laravel",
+        "framework"
+    ],
     "license": "MIT",
     "require": {
         "php": "^8.3",
@@ -13,7 +16,8 @@
         "laravel/socialite": "^5.23.0",
         "laravel/tinker": "^2.10.1",
         "livewire/flux": "^2.2.4",
-        "livewire/volt": "^1.7.2"
+        "livewire/volt": "^1.7.2",
+        "nunomaduro/essentials": "^0.1"
     },
     "require-dev": {
         "barryvdh/laravel-ide-helper": "^3.6",
@@ -25,7 +29,8 @@
         "mockery/mockery": "^1.6.12",
         "nunomaduro/collision": "^8.8.2",
         "pestphp/pest": "^3.8.2",
-        "pestphp/pest-plugin-laravel": "^3.2.0"
+        "pestphp/pest-plugin-laravel": "^3.2.0",
+        "pestphp/pest-plugin-type-coverage": "^3.6"
     },
     "autoload": {
         "psr-4": {
@@ -56,13 +61,23 @@
             "@php -r \"file_exists('database/database.sqlite') || touch('database/database.sqlite');\"",
             "@php artisan migrate --graceful --ansi"
         ],
-        "dev": [
-            "Composer\\Config::disableProcessTimeout",
-            "npx concurrently -c \"#93c5fd,#c4b5fd,#fb7185,#fdba74\" \"php artisan serve\" \"php artisan queue:listen --tries=1\" \"php artisan pail --timeout=0\" \"npm run dev\" --names=server,queue,logs,vite --kill-others"
+        "lint": [
+            "pint",
+            "npm run lint"
         ],
+        "refactor": "rector",
+        "test:lint": [
+            "pint --test",
+            "npm run test:lint"
+        ],
+        "test:unit": "pest --parallel",
+        "test:types": "phpstan",
+        "test:refactor": "rector --dry-run",
         "test": [
-            "@php artisan config:clear --ansi",
-            "@php artisan test"
+            "@test:unit",
+            "@test:lint",
+            "@test:types",
+            "@test:refactor"
         ]
     },
     "extra": {

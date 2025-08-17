@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Services\Octo;
 
 use App\Models\Octo\Comment;
@@ -7,17 +9,23 @@ use App\Models\Octo\Connection;
 use App\Models\Octo\Repository;
 use App\Models\User;
 use Carbon\Carbon;
+use Exception;
+use Illuminate\Http\Client\RequestException;
 use Illuminate\Http\Client\Response;
 use Illuminate\Support\Facades\Http;
-use Illuminate\Http\Client\RequestException;
 
-class CommentService
+final class CommentService
 {
-    protected Connection $connection;
+    private Connection $connection;
 
     public function __construct(User $user)
     {
         $this->connection = Connection::where('user_id', $user->id)->firstOrFail();
+    }
+
+    public static function forUser(User $user): self
+    {
+        return new self($user);
     }
 
     public function syncAllComments(): void
@@ -49,6 +57,18 @@ class CommentService
         $this->saveComments($commitComments, $repository, 'commit');
     }
 
+    public function postIssueComment(string $repoFullName, int $issueNumber, string $commentBody): array
+    {
+        $response = $this->makeApiRequest(
+            "/repos/{$repoFullName}/issues/{$issueNumber}/comments",
+            [],
+            'POST',
+            ['body' => $commentBody]
+        );
+
+        return $response->json();
+    }
+
     private function fetchIssueComments(string $repoFullName, ?int $issueNumber = null): array
     {
         $allComments = [];
@@ -63,7 +83,7 @@ class CommentService
                 'per_page' => $perPage,
                 'page' => $page,
                 'sort' => 'updated',
-                'direction' => 'desc'
+                'direction' => 'desc',
             ]);
 
             $comments = $response->json();
@@ -96,7 +116,7 @@ class CommentService
                 'per_page' => $perPage,
                 'page' => $page,
                 'sort' => 'updated',
-                'direction' => 'desc'
+                'direction' => 'desc',
             ]);
 
             $comments = $response->json();
@@ -171,8 +191,8 @@ class CommentService
     {
         try {
             $client = Http::withToken($this->connection->access_token)->timeout(30);
-            
-            $response = match (strtoupper($method)) {
+
+            $response = match (mb_strtoupper($method)) {
                 'POST' => $client->post("https://api.github.com{$url}", $data),
                 'PUT' => $client->put("https://api.github.com{$url}", $data),
                 'PATCH' => $client->patch("https://api.github.com{$url}", $data),
@@ -181,29 +201,12 @@ class CommentService
             };
 
             if ($response->failed()) {
-                throw new \Exception("GitHub API request failed: " . $response->status() . " - " . $response->body());
+                throw new Exception('GitHub API request failed: '.$response->status().' - '.$response->body());
             }
 
             return $response;
         } catch (RequestException $e) {
-            throw new \Exception("GitHub API request failed: " . $e->getMessage());
+            throw new Exception('GitHub API request failed: '.$e->getMessage());
         }
-    }
-
-    public static function forUser(User $user): self
-    {
-        return new self($user);
-    }
-
-    public function postIssueComment(string $repoFullName, int $issueNumber, string $commentBody): array
-    {
-        $response = $this->makeApiRequest(
-            "/repos/{$repoFullName}/issues/{$issueNumber}/comments",
-            [],
-            'POST',
-            ['body' => $commentBody]
-        );
-
-        return $response->json();
     }
 }

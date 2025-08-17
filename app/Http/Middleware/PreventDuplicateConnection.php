@@ -1,25 +1,28 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Middleware;
 
 use App\Models\Octo\Connection;
 use Closure;
+use Exception;
 use Filament\Notifications\Notification;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Laravel\Socialite\Facades\Socialite;
 use Symfony\Component\HttpFoundation\Response;
 
-class PreventDuplicateConnection
+final class PreventDuplicateConnection
 {
     /**
      * Handle an incoming request.
      *
-     * @param  \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response)  $next
+     * @param  Closure(Request): (Response)  $next
      */
     public function handle(Request $request, Closure $next): Response
     {
-        if (!Auth::check()) {
+        if (! Auth::check()) {
             return $next($request);
         }
 
@@ -39,7 +42,7 @@ class PreventDuplicateConnection
         }
 
         // If connection exists but token is invalid, delete the stale connection
-        if ($connection && !$this->isTokenValid($connection->access_token)) {
+        if ($connection && ! $this->isTokenValid($connection->access_token)) {
             $connection->delete();
         }
 
@@ -50,8 +53,9 @@ class PreventDuplicateConnection
     {
         try {
             $user = Socialite::driver('github')->userFromToken($token);
+
             return $user !== null;
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             return false;
         }
     }

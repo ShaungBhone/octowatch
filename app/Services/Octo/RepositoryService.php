@@ -1,17 +1,20 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Services\Octo;
 
 use App\Models\Octo\Connection;
 use App\Models\Octo\Repository;
 use App\Models\User;
 use Carbon\Carbon;
+use Exception;
 
-class RepositoryService
+final class RepositoryService
 {
-    protected Connection $connection;
+    private Connection $connection;
 
-    protected ApiClientService $github;
+    private ApiClientService $github;
 
     public function __construct(User $user)
     {
@@ -20,10 +23,15 @@ class RepositoryService
         $this->github = new ApiClientService($this->connection);
     }
 
+    public static function forUser(User $user): self
+    {
+        return new self($user);
+    }
+
     public function syncRepositories(): void
     {
         $repositories = $this->fetchAllRepositories();
-        
+
         // Process in chunks to avoid memory issues
         collect($repositories)
             ->chunk(50) // Process 50 repositories at a time
@@ -39,7 +47,7 @@ class RepositoryService
 
         foreach ($repositoryChunk as $repoData) {
             $repo = (object) $repoData;
-            
+
             $batchData[] = [
                 'octo_connection_id' => $this->connection->id,
                 'repo_id' => (int) $repo->id,
@@ -65,7 +73,7 @@ class RepositoryService
             [
                 'octo_connection_id', 'name', 'full_name', 'description', 'language', 'private',
                 'stargazers_count', 'open_issues_count', 'forks_count',
-                'watchers_count', 'updated_at_github', 'updated_at'
+                'watchers_count', 'updated_at_github', 'updated_at',
             ] // Columns to update
         );
     }
@@ -84,12 +92,12 @@ class RepositoryService
             ]);
 
             if ($response->failed()) {
-                throw new \Exception("Failed to fetch repositories: " . $response->body());
+                throw new Exception('Failed to fetch repositories: '.$response->body());
             }
 
             $data = $response->json();
 
-            if (!is_array($data) || empty($data)) {
+            if (! is_array($data) || empty($data)) {
                 break;
             }
 
@@ -104,10 +112,5 @@ class RepositoryService
         } while (count($data) === 100 && $page <= $maxPages);
 
         return $repositories;
-    }
-
-    public static function forUser(User $user): self
-    {
-        return new self($user);
     }
 }

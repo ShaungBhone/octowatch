@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Database\Factories\Octo;
 
 use App\Models\Octo\Connection;
@@ -8,7 +10,7 @@ use Illuminate\Database\Eloquent\Factories\Factory;
 /**
  * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Octo\Repository>
  */
-class RepositoryFactory extends Factory
+final class RepositoryFactory extends Factory
 {
     /**
      * Define the model's default state.
@@ -19,7 +21,7 @@ class RepositoryFactory extends Factory
     {
         $name = fake()->slug(2);
         $username = fake()->userName();
-        
+
         return [
             'octo_connection_id' => Connection::factory(),
             'repo_id' => fake()->randomNumber(8),

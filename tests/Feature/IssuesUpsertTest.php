@@ -33,7 +33,7 @@ test('issues upsert works with unique issue_id constraint', function () {
             'closed_at_github' => null,
             'created_at' => now(),
             'updated_at' => now(),
-        ]
+        ],
     ];
 
     // First insert should work
@@ -43,7 +43,7 @@ test('issues upsert works with unique issue_id constraint', function () {
         [
             'octo_connection_id', 'octo_repository_id', 'number', 'title', 'body', 'state', 'author_login',
             'author_avatar_url', 'labels', 'comments_count',
-            'created_at_github', 'updated_at_github', 'closed_at_github', 'updated_at'
+            'created_at_github', 'updated_at_github', 'closed_at_github', 'updated_at',
         ]
     );
 
@@ -59,7 +59,7 @@ test('issues upsert works with unique issue_id constraint', function () {
         [
             'octo_connection_id', 'octo_repository_id', 'number', 'title', 'body', 'state', 'author_login',
             'author_avatar_url', 'labels', 'comments_count',
-            'created_at_github', 'updated_at_github', 'closed_at_github', 'updated_at'
+            'created_at_github', 'updated_at_github', 'closed_at_github', 'updated_at',
         ]
     );
 
@@ -100,7 +100,7 @@ test('issues upsert updates existing issues correctly', function () {
             'closed_at_github' => now(),
             'created_at' => $issue->created_at,
             'updated_at' => now(),
-        ]
+        ],
     ];
 
     Issues::upsert(
@@ -109,12 +109,12 @@ test('issues upsert updates existing issues correctly', function () {
         [
             'octo_connection_id', 'octo_repository_id', 'number', 'title', 'body', 'state', 'author_login',
             'author_avatar_url', 'labels', 'comments_count',
-            'created_at_github', 'updated_at_github', 'closed_at_github', 'updated_at'
+            'created_at_github', 'updated_at_github', 'closed_at_github', 'updated_at',
         ]
     );
 
     $updatedIssue = Issues::where('issue_id', 987654321)->first();
-    
+
     expect($updatedIssue->title)->toBe('Updated Title');
     expect($updatedIssue->state)->toBe('closed');
     expect($updatedIssue->comments_count)->toBe(5);

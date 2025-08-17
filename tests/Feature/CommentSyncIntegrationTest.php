@@ -2,9 +2,11 @@
 
 declare(strict_types=1);
 
-use App\Jobs\{SyncRepositoriesJob, SyncIssuesJob, SyncCommentsJob};
-use App\Models\User;
+use App\Jobs\SyncCommentsJob;
+use App\Jobs\SyncIssuesJob;
+use App\Jobs\SyncRepositoriesJob;
 use App\Models\Octo\Connection;
+use App\Models\User;
 use App\Services\Octo\CoordinatorService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Queue;
@@ -13,7 +15,7 @@ uses(RefreshDatabase::class);
 
 test('coordinator can sync repositories with comments async', function () {
     Queue::fake();
-    
+
     $user = User::factory()->create();
     $coordinator = CoordinatorService::forUser($user);
 
@@ -27,13 +29,13 @@ test('coordinator can sync repositories with comments async', function () {
 
 test('coordinator can sync issues with comments async', function () {
     Queue::fake();
-    
+
     $user = User::factory()->create();
     $connection = Connection::factory()->for($user)->create();
-    \App\Models\Octo\Repository::factory()->create([
-        'octo_connection_id' => $connection->id
+    App\Models\Octo\Repository::factory()->create([
+        'octo_connection_id' => $connection->id,
     ]);
-    
+
     $coordinator = CoordinatorService::forUser($user);
 
     $coordinator->syncIssuesAndCommentsAsync();
@@ -46,7 +48,7 @@ test('coordinator can sync issues with comments async', function () {
 
 test('coordinator can sync all data async including comments', function () {
     Queue::fake();
-    
+
     $user = User::factory()->create();
     $coordinator = CoordinatorService::forUser($user);
 
@@ -61,7 +63,7 @@ test('coordinator can sync all data async including comments', function () {
 
 test('sync jobs are chained in correct order', function () {
     Queue::fake();
-    
+
     $user = User::factory()->create();
     $coordinator = CoordinatorService::forUser($user);
 
@@ -82,7 +84,7 @@ test('sync jobs are chained in correct order', function () {
 test('new comment sync methods exist on coordinator service', function () {
     $user = User::factory()->create();
     $coordinator = CoordinatorService::forUser($user);
-    
+
     expect(method_exists($coordinator, 'syncRepositoriesWithCommentsAsync'))->toBeTrue();
     expect(method_exists($coordinator, 'syncIssuesAndCommentsAsync'))->toBeTrue();
 });

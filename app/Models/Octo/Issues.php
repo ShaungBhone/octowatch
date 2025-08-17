@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Models\Octo;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -7,10 +9,10 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-class Issues extends Model
+final class Issues extends Model
 {
     use HasFactory;
-    
+
     protected $table = 'octo_issues';
 
     protected $guarded = [];

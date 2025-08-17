@@ -1,10 +1,13 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Filament\Resources\Octo\Issues\Tables;
 
 use App\Models\Octo\Comment;
 use App\Models\Octo\Issues;
 use App\Services\Octo\CommentService;
+use Exception;
 use Filament\Actions\Action;
 use Filament\Forms\Components\Textarea;
 use Filament\Support\Enums\FontWeight;
@@ -16,7 +19,7 @@ use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Support\Facades\Auth;
 
-class IssuesTable
+final class IssuesTable
 {
     public static function configure(Table $table): Table
     {
@@ -25,7 +28,7 @@ class IssuesTable
                 Stack::make([
                     Split::make([
                         TextColumn::make('repository.name')
-                            ->formatStateUsing(fn(
+                            ->formatStateUsing(fn (
                                 $state,
                                 $record
                             ) => "{$state} #{$record->number}")
@@ -33,7 +36,7 @@ class IssuesTable
                         TextColumn::make('state')
                             ->badge()
                             ->alignEnd()
-                            ->color(fn(string $state): string => match ($state) {
+                            ->color(fn (string $state): string => match ($state) {
                                 'open' => 'success',
                                 'closed' => 'danger',
                             }),
@@ -57,7 +60,7 @@ class IssuesTable
                             ->rows(3),
                     ])
                     ->modalHeading(
-                        fn(Issues $record) => "{$record->repository->name} #{$record->number}"
+                        fn (Issues $record) => "{$record->repository->name} #{$record->number}"
                     )
                     ->modalContent(function (Issues $record) {
                         $comments = Comment::where(
@@ -77,14 +80,14 @@ class IssuesTable
                     ->action(function (array $data, Issues $record) {
                         $user = Auth::user();
                         $commentService = CommentService::forUser($user);
-                        
+
                         try {
                             $githubComment = $commentService->postIssueComment(
                                 $record->repository->full_name,
                                 $record->number,
                                 $data['comment_body']
                             );
-                            
+
                             Comment::create([
                                 'repository_id' => $record->octo_repository_id,
                                 'octo_id' => (string) $githubComment['id'],
@@ -96,10 +99,10 @@ class IssuesTable
                                 'created_at_github' => $githubComment['created_at'] ? \Carbon\Carbon::parse($githubComment['created_at']) : now(),
                                 'updated_at_github' => $githubComment['updated_at'] ? \Carbon\Carbon::parse($githubComment['updated_at']) : now(),
                             ]);
-                            
-                        } catch (\Exception $e) {
+
+                        } catch (Exception $e) {
                             $githubUsername = $record->repository->connection->username ?? 'Unknown';
-                            
+
                             Comment::create([
                                 'repository_id' => $record->octo_repository_id,
                                 'body' => $data['comment_body'],
@@ -109,7 +112,7 @@ class IssuesTable
                                 'updated_at_github' => now(),
                             ]);
                         }
-                    })
+                    }),
             ])
             ->filters([
                 SelectFilter::make('repository')

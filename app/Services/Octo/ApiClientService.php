@@ -1,14 +1,18 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Services\Octo;
 
 use App\Models\Octo\Connection;
+use Exception;
+use Illuminate\Http\Client\RequestException;
 use Illuminate\Http\Client\Response;
 use Illuminate\Support\Facades\Http;
-use Illuminate\Http\Client\RequestException;
 use Illuminate\Support\Str;
+use InvalidArgumentException;
 
-class ApiClientService
+final class ApiClientService
 {
     public function __construct(
         private Connection $connection
@@ -37,18 +41,18 @@ class ApiClientService
                 'GET' => $client->get($url, $data),
                 'POST' => $client->post($url, $data),
                 'PUT' => $client->put($url, $data),
-                default => throw new \InvalidArgumentException("Unsupported method: {$method}")
+                default => throw new InvalidArgumentException("Unsupported method: {$method}")
             };
 
             if ($response->failed()) {
-                throw new \Exception(
-                    "GitHub API request failed: " . $response->status() . " - " . $response->body()
+                throw new Exception(
+                    'GitHub API request failed: '.$response->status().' - '.$response->body()
                 );
             }
 
             return $response;
         } catch (RequestException $e) {
-            throw new \Exception("GitHub API request failed: " . $e->getMessage());
+            throw new Exception('GitHub API request failed: '.$e->getMessage());
         }
     }
 }

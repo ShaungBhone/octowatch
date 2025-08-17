@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use App\Http\Controllers\ConnectViaOctoController;
 use Illuminate\Support\Facades\Route;
 
@@ -8,7 +10,7 @@ Route::post('logout', App\Livewire\Actions\Logout::class)
 
 Route::middleware([
     'auth',
-    'connected'
+    'connected',
 ])->group(function () {
     Route::get('auth/redirect', [ConnectViaOctoController::class, 'create'])
         ->name('octo.connect');

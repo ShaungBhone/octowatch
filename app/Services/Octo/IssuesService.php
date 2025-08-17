@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Services\Octo;
 
 use App\Models\Octo\Connection;
@@ -7,17 +9,24 @@ use App\Models\Octo\Issues;
 use App\Models\Octo\Repository;
 use App\Models\User;
 use Carbon\Carbon;
+use Exception;
 
-class IssuesService
+final class IssuesService
 {
-    protected Connection $connection;
-    protected ApiClientService $github;
+    private Connection $connection;
+
+    private ApiClientService $github;
 
     public function __construct(User $user)
     {
         $this->connection = Connection::where('user_id', $user->id)->firstOrFail();
 
         $this->github = new ApiClientService($this->connection);
+    }
+
+    public static function forUser(User $user): self
+    {
+        return new self($user);
     }
 
     public function syncAllIssues(): void
@@ -42,6 +51,26 @@ class IssuesService
             ->each(function ($chunk) use ($repository) {
                 $this->processBatchIssues($chunk, $repository);
             });
+    }
+
+    public function fetchIssuesByState(Repository $repository, string $state = 'open'): array
+    {
+        return $this->fetchAllIssues($repository->full_name, $state);
+    }
+
+    public function fetchIssuesByLabel(Repository $repository, string $label): array
+    {
+        $response = $this->github->get("/repos/{$repository->full_name}/issues", [
+            'labels' => $label,
+            'state' => 'all',
+            'per_page' => 100,
+        ]);
+
+        if ($response->failed()) {
+            throw new Exception('Failed to fetch issues by label: '.$response->body());
+        }
+
+        return $response->json();
     }
 
     private function processBatchIssues($issueChunk, Repository $repository): void
@@ -77,7 +106,7 @@ class IssuesService
             [
                 'octo_connection_id', 'octo_repository_id', 'number', 'title', 'body', 'state', 'author_login',
                 'author_avatar_url', 'labels', 'comments_count',
-                'created_at_github', 'updated_at_github', 'closed_at_github', 'updated_at'
+                'created_at_github', 'updated_at_github', 'closed_at_github', 'updated_at',
             ] // Columns to update
         );
     }
@@ -99,7 +128,7 @@ class IssuesService
             ]);
 
             if ($response->failed()) {
-                throw new \Exception("Failed to fetch issues: " . $response->body());
+                throw new Exception('Failed to fetch issues: '.$response->body());
             }
 
             $issues = $response->json();
@@ -110,7 +139,7 @@ class IssuesService
 
             // Filter out pull requests (GitHub API includes PRs in issues endpoint)
             $actualIssues = array_filter($issues, function ($issue) {
-                return !isset($issue['pull_request']);
+                return ! isset($issue['pull_request']);
             });
 
             $allIssues = array_merge($allIssues, $actualIssues);
@@ -152,30 +181,5 @@ class IssuesService
                 'closed_at_github' => Carbon::parse($issueData['closed_at']),
             ]
         );
-    }
-
-    public function fetchIssuesByState(Repository $repository, string $state = 'open'): array
-    {
-        return $this->fetchAllIssues($repository->full_name, $state);
-    }
-
-    public function fetchIssuesByLabel(Repository $repository, string $label): array
-    {
-        $response = $this->github->get("/repos/{$repository->full_name}/issues", [
-            'labels' => $label,
-            'state' => 'all',
-            'per_page' => 100,
-        ]);
-
-        if ($response->failed()) {
-            throw new \Exception("Failed to fetch issues by label: " . $response->body());
-        }
-
-        return $response->json();
-    }
-
-    public static function forUser(User $user): self
-    {
-        return new self($user);
     }
 }

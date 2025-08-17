@@ -1,13 +1,16 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers;
 
-use Laravel\Socialite\Facades\Socialite;
 use App\Models\Octo\Connection;
+use Exception;
 use Filament\Notifications\Notification;
 use Illuminate\Support\Facades\Auth;
+use Laravel\Socialite\Facades\Socialite;
 
-class ConnectViaOctoController extends Controller
+final class ConnectViaOctoController extends Controller
 {
     public function create()
     {
@@ -25,7 +28,7 @@ class ConnectViaOctoController extends Controller
             if (\App\Models\User::where(
                 [
                     'email' => $githubUser->getEmail(),
-                    'github_id' => null
+                    'github_id' => null,
                 ]
             )->exists()) {
                 return redirect(route('filament.admin.pages.dashboard'))
@@ -51,7 +54,7 @@ class ConnectViaOctoController extends Controller
                 ->send();
 
             return redirect()->route('filament.admin.pages.dashboard');
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Notification::make()
                 ->title('GitHub Connection Failed')
                 ->body($e->getMessage())

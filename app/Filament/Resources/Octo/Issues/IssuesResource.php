@@ -1,16 +1,18 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Filament\Resources\Octo\Issues;
 
-use App\Filament\Resources\Octo\Issues\Tables\IssuesTable;
 use App\Filament\Resources\Octo\Issues\Pages\ManageIssues;
+use App\Filament\Resources\Octo\Issues\Tables\IssuesTable;
 use App\Models\Octo\Issues;
 use BackedEnum;
 use Filament\Resources\Resource;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
 
-class IssuesResource extends Resource
+final class IssuesResource extends Resource
 {
     protected static ?string $model = Issues::class;
 

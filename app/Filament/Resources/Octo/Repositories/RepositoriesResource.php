@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Filament\Resources\Octo\Repositories;
 
 use App\Models\Octo\Repository;
@@ -17,7 +19,7 @@ use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 
-class RepositoriesResource extends Resource
+final class RepositoriesResource extends Resource
 {
     protected static ?string $model = Repository::class;
 
@@ -86,14 +88,14 @@ class RepositoriesResource extends Resource
                     ViewAction::make(),
                     EditAction::make(),
                     DeleteAction::make(),
-                ])
+                ]),
             ]);
     }
 
     public static function getPages(): array
     {
         return [
-            'index' => \App\Filament\Resources\Octo\Repositories\Pages\ManageRepositories::route('/'),
+            'index' => Pages\ManageRepositories::route('/'),
         ];
     }
 }

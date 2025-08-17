@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use App\Models\Octo\Connection;
 use App\Models\Octo\Repository;
 use App\Models\User;
@@ -56,7 +58,7 @@ test('repository upsert works with unique repo_id constraint', function () {
 
     // Verify repositories were created
     expect(Repository::count())->toBe(2);
-    
+
     $repo1 = Repository::where('repo_id', 123456)->first();
     expect($repo1)->not->toBeNull();
     expect($repo1->name)->toBe('test-repo');
@@ -112,7 +114,7 @@ test('repository upsert updates existing repositories correctly', function () {
 
     // Verify only one repository exists (updated, not duplicated)
     expect(Repository::count())->toBe(1);
-    
+
     $updatedRepo = Repository::where('repo_id', 123456)->first();
     expect($updatedRepo)->not->toBeNull();
     expect($updatedRepo->id)->toBe($existingRepo->id); // Same database record

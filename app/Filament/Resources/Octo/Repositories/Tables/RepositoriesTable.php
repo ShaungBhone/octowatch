@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Filament\Resources\Octo\Repositories\Tables;
 
 use Filament\Actions\ActionGroup;
@@ -11,7 +13,7 @@ use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 
-class RepositoriesTable
+final class RepositoriesTable
 {
     public static function configure(Table $table): Table
     {
@@ -55,7 +57,7 @@ class RepositoriesTable
                     ViewAction::make(),
                     EditAction::make(),
                     DeleteAction::make(),
-                ])
+                ]),
             ]);
     }
 }

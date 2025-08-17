@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Database\Factories\Octo;
 
 use App\Models\Octo\Connection;
@@ -9,7 +11,7 @@ use Illuminate\Database\Eloquent\Factories\Factory;
 /**
  * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Octo\Issues>
  */
-class IssuesFactory extends Factory
+final class IssuesFactory extends Factory
 {
     /**
      * Define the model's default state.
