@@ -34,7 +34,7 @@
         </div>
         @if($record->body)
         <div class="text-sm text-gray-700 dark:text-gray-300 mt-2 p-3 bg-white dark:bg-gray-800 rounded border">
-            {{ Str::limit($record->body, 300) }}
+            {!! $record->body !!}
         </div>
         @endif
     </div>
